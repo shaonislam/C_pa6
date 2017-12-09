@@ -1,76 +1,110 @@
-#include <stdio.h>
+#include  <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include  <sys/types.h>
+#include <sys/wait.h>
+#include <errno.h>
 
-#define MAX_BUF 100
+#define MAX_BUF 1024
 
 
-/* execvp(command, argument) */
 
 
-int main (int argc, char *argv[]) 
+int set_arr(char *line, char **arr);
+/*int execute(char **argv);*/
+int execute(char *command);
+
+
+int main (int argc, char *argv[])
 {
-	int pr_limit, status;
+	int pr_limit = atoi(argv[1]);
+	int child;
 	int pr_count = 0;
-	pid_t childpid;
-	int i;
-	char cmd[MAX_BUF]; 
+	int total_count = 0;
 
-	if (argc != 2)
+	pid_t pid;
+        int status, childPID;
+        int i;
+        char *arg[50];
+
+	char command[MAX_BUF];           
+
+
+     	while (fgets(command, MAX_BUF, stdin) != NULL) 
 	{ 
- 		fprintf(stderr, "Usage: %s processes\n", argv[0]);
- 		return 1;
- 	}
- 
-	/* Setting of number of processes to run at a time */
-	pr_limit = atoi(argv[1]);
-
-
-	/*Main loop through whole testing.data */
-	while (fgets(cmd, MAX_BUF - 1, stdin) != NULL)
-	{
-		if (pr_limit == pr_count)
+		
+	  	printf("\ncommand: %s", command);	
+        
+		if (pr_count == pr_limit)
 		{
 			wait(NULL);
 			pr_count--;
-		}
+		}	
 
-		/* Execute the program: fork a child and execute file */
-		
-		childpid = fork();
-		
-		/* Check if child is created properly */
-		if (childpid < 0)
-		{
-			printf("\nFailed to create child.\n");
-			return 1;
-		}
-
-		/* Increment Number of Active Children */
 		pr_count++;
+		total_count++;
 
 
-		/* Check to see if any children have finished */
-		waitpid(-1, &status, WNOHANG);
-		
+        	if ((pid = fork()) < 0)
+        	{
+                	printf("FORK FAILED\n");
+                	exit(1);
+        	}
 
+        	if (pid == 0)
+        	{
+                	/* IT'S A CHILD */
+                	printf("CHILD %ld created!\n", getpid());
+			set_arr(command, arg);
+
+                	if (execvp(*arg, arg) < 0)
+                	{
+                        	printf("EXEC FAILED NOOO\n");	
+     				exit(1);
+			}	
+                }
+      
+
+
+		if (waitpid(-1,NULL, WNOHANG) != 0)
+		{
+			pr_count--;
+		}		
 	}
 
 
+	while(1)
+	{
+		child = wait(NULL);
+		
+		if ((child == -1) && (errno != EINTR))
+		{
+			break;
+		}
+	}
 
 
-/*
-	for (i = 1; i < pr_limit; i++)
- 		if ((childpid = fork()) <= 0)
- 			break;
- 
-	fprintf(stderr, "i:%d process ID:%ld parent ID:%ld child ID:%ld\n" ,i, getpid(), getppid(), childpid);
-*/
-
-
-
-
-
- 
 	return 0;
+}
+
+
+
+int set_arr (char *line, char **arr)
+{
+
+     	while (*line != '\0') 
+	{  
+		while (*line == ' ' || *line == '\t' || *line == '\n')
+               	{
+			*line++ = '\0';   
+        	}
+
+		*arr++ = line;      
+          
+		while (*line != '\0' && *line != ' ' && *line != '\t' && *line != '\n') 
+               	{	
+			line++;          
+     		}
+	}
+
+	     *arr = '\0';              
 }
