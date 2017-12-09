@@ -1,16 +1,20 @@
+/*
+Shaon Islam
+CS 2750 PA 6
+*/
+
 #include  <stdio.h>
 #include <stdlib.h>
 #include  <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
 
-#define MAX_BUF 1024
+#define MAX_BUF 100
 
 
 
 
 int set_arr(char *line, char **arr);
-/*int execute(char **argv);*/
 int execute(char *command);
 
 
@@ -33,7 +37,7 @@ int main (int argc, char *argv[])
 	{ 
 		
 	  	printf("\ncommand: %s", command);	
-        
+        	
 		if (pr_count == pr_limit)
 		{
 			wait(NULL);
@@ -41,30 +45,31 @@ int main (int argc, char *argv[])
 		}	
 
 		pr_count++;
-		total_count++;
 
-
+		/* Creating the child process */
         	if ((pid = fork()) < 0)
         	{
-                	printf("FORK FAILED\n");
+                	perror("fork failed\n");
                 	exit(1);
         	}
 
         	if (pid == 0)
         	{
                 	/* IT'S A CHILD */
-                	printf("CHILD %ld created!\n", getpid());
+                	/* Calling the set array to format the command line*/
 			set_arr(command, arg);
 
+			
+			/* Executing testsim */
                 	if (execvp(*arg, arg) < 0)
                 	{
-                        	printf("EXEC FAILED NOOO\n");	
+                        	perror("EXEC FAILED \n");	
      				exit(1);
 			}	
                 }
       
-
-
+			
+		/* decrementing as child finishes */
 		if (waitpid(-1,NULL, WNOHANG) != 0)
 		{
 			pr_count--;
@@ -87,13 +92,13 @@ int main (int argc, char *argv[])
 }
 
 
-
+/*filling out the proper args in arr */
 int set_arr (char *line, char **arr)
 {
 
      	while (*line != '\0') 
 	{  
-		while (*line == ' ' || *line == '\t' || *line == '\n')
+		while (*line == ' ' ||  *line == '\n')
                	{
 			*line++ = '\0';   
         	}
