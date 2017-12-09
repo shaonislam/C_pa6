@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 	while (n > 0)
 	{
 		sleep(sec);
-		printf("Process %d [%d] is sleeping for %d seconds\n", getpid(),n,sec);
+		printf("Process %d [%d] is sleeping\n", getpid(),n);
 		n--;
 	}
 
