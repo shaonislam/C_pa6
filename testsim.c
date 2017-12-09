@@ -1,5 +1,6 @@
 /* testsim.c */
 #include <stdio.h>
+
 int main(int argc, char *argv[])
 {
 	int n;
@@ -14,14 +15,10 @@ int main(int argc, char *argv[])
 	sscanf(argv[1], "%d", &sec);
 	sscanf(argv[2], "%d", &n);
 
-
-	while (n > 0)
+	while (n-- > 0)
 	{
 		sleep(sec);
-		printf("Process %d [%d] is sleeping\n", getpid(),n);
-		n--;
+		printf("Process ID %d [%d] is sleeping \n", getpid(), n);
 	}
-
-	printf("Process %d end!\n", getpid());
 	return 0;
 }
