@@ -1,4 +1,7 @@
-/* testsim.c */
+/*
+Shaon Islam
+CS2750  PA 6
+*/
 #include <stdio.h>
 
 int main(int argc, char *argv[])
